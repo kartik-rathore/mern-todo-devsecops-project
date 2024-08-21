@@ -1,4 +1,4 @@
-# creating vpc for Jenkins 
+# creating vpc for Jenkins
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
@@ -19,7 +19,6 @@ module "vpc" {
   public_subnet_tags = {
     Name = "jenkins-subnet"
   }
-
 }
 
 module "security_group" {
@@ -30,18 +29,11 @@ module "security_group" {
   vpc_id      = module.vpc.vpc_id
 
   ingress_with_cidr_blocks = [
-    {
-      from_port   = 8080
-      to_port     = 8080
+    for port in [22, 80, 443, 8080, 8081, 9000] : {
+      from_port   = port
+      to_port     = port
       protocol    = "tcp"
-      description = "HTTP"
-      cidr_blocks = "0.0.0.0/0"
-    },
-    {
-      from_port   = 22
-      to_port     = 22
-      protocol    = "tcp"
-      description = "SSH"
+      description = "Allow port ${port}"
       cidr_blocks = "0.0.0.0/0"
     }
   ]
@@ -59,8 +51,8 @@ module "security_group" {
     Name = "jenkins-sg"
   }
 }
-# create ec2 instance using module
 
+# create ec2 instance using module
 module "ec2_instance" {
   source  = "terraform-aws-modules/ec2-instance/aws"
   version = "~> 3.0"
@@ -75,10 +67,10 @@ module "ec2_instance" {
   associate_public_ip_address = true
   user_data                   = file("jenkins-install.sh")
   availability_zone           = data.aws_availability_zones.azs.names[0]
- root_block_device = [
+  root_block_device = [
     {
       volume_type = "gp2"
-      volume_size = 15 # Specify the desired volume size in GB
+      volume_size = 20
     }
   ]
 
@@ -88,8 +80,3 @@ module "ec2_instance" {
     Environment = "dev"
   }
 }
-
-
-
-
-

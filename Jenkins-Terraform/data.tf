@@ -1,15 +1,10 @@
 data "aws_ami" "jenkins" {
   most_recent = true
-  owners      = ["amazon"]
+  owners      = ["099720109477"] # Canonical
 
   filter {
     name   = "name"
-    values = ["amzn2-ami-kernel-*-hvm-*-x86_64-gp2"]
-  }
-
-  filter {
-    name   = "root-device-type"
-    values = ["ebs"]
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
   }
 
   filter {
@@ -17,5 +12,3 @@ data "aws_ami" "jenkins" {
     values = ["hvm"]
   }
 }
-
-data "aws_availability_zones" "azs" {}
